@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<!-- 
+		Author: Chris Hiles
+		Date: 2017-02-23
+		Purpose: This is a coin flipping app developed for PAX Christi Trivia gambling night in Louisville KY. It definitely
+		rounds, so is not completely fair, but I'm not telling anyone.
+		
+		Borrowed coin images from: https://www.random.org/coins/?num=1&cur=60-usd.0050c
+		Borrowed code from: https://davidwalsh.name/css-flip
+	-->
+  <meta charset="utf-8" />
+  
+  <!-- disable zooming -->
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=0" />
+  
+  <title>Trivia Night Coin Flipper</title>
+	<style media="screen">
+
+		.centered {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			-ms-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%) scale(1.2);
+		  text-align: center;
+		}
+
+		/* entire container, keeps perspective */
+		.flip-container {
+			position: relative;
+			perspective: 500px;
+		}
+
+
+		.flip-container, .front, .back {
+			width: 200px;
+			height: 200px;
+		}
+		
+		.flip-container .flipper {
+			transform-origin: 100% 100px; /* half of height so it flips in the middle */
+		}
+			
+		/* flip speed goes here */
+		.flipper {
+			transform-style: preserve-3d;
+			position: absolute;
+		}
+
+		/* hide back of pane during swap */
+		.front, .back {
+			backface-visibility: hidden;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+		/* front pane, placed above back */
+		.front {
+			z-index: 2;
+			/* for firefox 31 */
+			transform: rotateX(0deg);
+		}
+
+		/* back, initially hidden pane */
+		.back {
+			transform: rotateX(180deg);
+		}
+
+		.FlipStatus {
+			font-Size: 200%;
+		}
+
+		#c_ButtonFlip{
+			width: 150px;
+			height: 50px;
+			
+		}
+	</style>
+
+</head>
+<body>
+	<div class="centered">
+		<h1 class="FlipStatus" id="c_FlipStatus">Flip the coin...</h1>
+			<div class="flip-container" id="c_FlipCoinDiv">
+				<div class="flipper" id="c_CoinFlipper">
+					<div class="front heads" style="background: url(./Images/Heads.jpg) 0 0 no-repeat;">
+						<!--Heads-->
+					</div>
+					<div class="back" style="background: url(./Images/Tails.jpg) 0 0 no-repeat;">
+						<!--Tails-->
+					</div>
+				</div>	
+			</div>
+		<p><button class="ButtonFlip" id="c_ButtonFlip">Flip Coin</button></p>
+	</div>
+	<script>
+		document.getElementById("c_ButtonFlip").addEventListener("click", function(){
+			location.reload();
+		});
+		
+		//After the browser window has loaded.
+		function Load() {
+			document.getElementById("c_FlipStatus").innerHTML = "Flipping...";
+			document.getElementById("c_ButtonFlip").disabled = true;
+			f_FlipTheCoin();
+		}
+		window.onload = Load;
+		
+		// Update results and enable the reset button.
+		var f_UpdateScreenAfterFlip = function()
+		{
+			var CoinElement = document.getElementById("c_FlipCoinDiv");
+			document.getElementById("c_FlipStatus").innerHTML = Winner + " Wins!";
+			document.getElementById("c_ButtonFlip").disabled = false;
+		};
+		
+		// get a random int between some numbers. currently 20-29.
+		var f_GetRotationCount = function()
+		{
+			//seemed like a reasonable range...
+			var Max = 30;
+			var Min = 20;
+			return Math.floor(Math.random() * (Max - Min) + Min);
+		};
+		
+		// Does the main coin flipping logic
+		var f_FlipTheCoin = function ()
+		{
+			var RotationCount = f_GetRotationCount();
+			console.log("rotations to perform: " + RotationCount);
+			var RotationalAngle = 180*RotationCount;
+			console.log("coin will flip for a total of degrees: " + RotationalAngle);
+			//I know, we can predict the future...
+			//if it rotates all the way back around, it is heads, since that's where it starts.
+			if ((RotationalAngle%360) === 0)
+			{
+				Winner = "Heads";
+				console.log("winner should be Heads");
+			}
+			else
+			{
+				Winner = "Tails";
+				console.log("winner should be tails");
+			}
+			//this works out to look pretty decent currently...
+			var TotalAnimationTimeSeconds = 100/RotationCount;
+			
+			console.log("Total flip time in seconds: " + TotalAnimationTimeSeconds);
+			//dynamically set the css transition time and degrees of rotation.
+			var FlipperElement = document.getElementById("c_CoinFlipper");
+			FlipperElement.style.transitionDuration = TotalAnimationTimeSeconds + "s";
+			FlipperElement.style.transitionTimingFunction="ease-out";
+			FlipperElement.style.transform = "rotateX(" + RotationalAngle + "deg)";
+			//set the callback for when the animation is finished.
+			FlipperElement.addEventListener("webkitTransitionEnd", f_UpdateScreenAfterFlip);
+		}
+		
+		
+
+		
+		
+	</script>
+</body>
+</html>
